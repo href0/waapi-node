@@ -4,6 +4,8 @@ const socketIO = require('socket.io')
 const qrcode = require('qrcode');
 const fs = require('fs');
 const http = require('http')
+const { phoneNumberFormatter } = require('./helper/formatter');
+const { check, validationResult } = require('express-validator');
 
 const app = express();
 const server = http.createServer(app)
@@ -60,8 +62,24 @@ io.on('connection', (socket) =>{
 })
 
 // send message
-app.post('/send-message', (req, res) => {
-    const number = req.body.number+'@c.us';
+app.post('/send-message', [
+    check('number')
+    .isLength({ min: 5 })
+    .withMessage('must be at least 5 chars long')
+    .matches(/^[0-9]+$/)
+    .withMessage('number only'),
+    check('message').notEmpty().withMessage('message cannot be empty'),
+], (req, res) => {
+    const errors = validationResult(req).formatWith(({ msg }) => {
+        return msg;
+    });
+    if(!errors.isEmpty()){
+        return res.status(422).json({
+            status:false,
+            message:errors.mapped()
+        })
+    }
+    const number = phoneNumberFormatter(req.body.number);
     const message = req.body.message;
     client.sendMessage(number, message).then(response => {
         res.status(200).json({
