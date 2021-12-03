@@ -55,7 +55,7 @@ const createSession = () => {
     });
     client.on('message', msg => {
         if (msg.body == 'p' || msg.body == 'P') {
-            msg.reply('papopee');
+            msg.reply('papope');
         }
     });
     client.on('disconnected', (reason) => {
