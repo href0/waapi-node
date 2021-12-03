@@ -16,11 +16,12 @@
         <h3>Logs: </h3>
         <ul id="logs"></ul>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.min.js"
         integrity="sha512-I9p4eOeWXGM9m5GhJYd3UDUA5Lr+Epp5e4ykWFYW9hv3jZqdR92S5p+ApMSWuMaV4E+JqILepP1G9kNer4AFGQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function () {
             let socket = io.connect('http://localhost:8000', {
@@ -31,6 +32,15 @@
             })
             socket.on('qr', (src) => {
                 $('#qrcode').attr('src', src)
+            })
+            socket.on('ready', (src) => {
+                $('#qrcode').hide()
+            })
+            socket.on('authenticated', (src) => {
+                $('#qrcode').hide()
+            })
+            socket.on('scan', (src) => {
+                $('#qrcode').show()
             })
 
         });
