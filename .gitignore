@@ -1,4 +1,6 @@
+# Ignore node_modules folder
 node_modules
-whatsapp-session*.json
+#Wa session
+whatsapp-session.json
+#package-lock
 package-lock.json
-downloaded-media/
