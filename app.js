@@ -56,8 +56,49 @@ const db = require("./helper/db.js");
         msg.reply("papope");
       }
     });
+
+    // send message
+    app.post(
+      "/send-message",
+      [
+        check("number")
+          .isLength({
+            min: 5,
+          })
+          .withMessage("must be at least 5 chars long")
+          .matches(/^[0-9]+$/)
+          .withMessage("number only"),
+        check("message").notEmpty().withMessage("message cannot be empty"),
+      ],
+      (req, res) => {
+        const errors = validationResult(req).formatWith(({ msg }) => {
+          return msg;
+        });
+        if (!errors.isEmpty()) {
+          return res.status(422).json({
+            status: false,
+            message: errors.mapped(),
+          });
+        }
+        const number = phoneNumberFormatter(req.body.number);
+        const message = req.body.message;
+        client
+          .sendMessage(number, message)
+          .then((response) => {
+            res.status(200).json({
+              status: true,
+              response: response,
+            });
+          })
+          .catch((err) => {
+            res.status(500).json({
+              status: false,
+              response: err,
+            });
+          });
+      }
+    );
     client.initialize();
-    socket.emit("message", "Connecting... please wait");
 
     client.on("disconnected", (reason) => {
       console.log("Whatsapp disconnected");
@@ -65,6 +106,7 @@ const db = require("./helper/db.js");
       client.destroy();
       client.initialize();
     });
+    socket.emit("message", "Connecting... please wait");
 
     client.on("qr", (qr) => {
       // Generate and scan this code with your phone
@@ -94,48 +136,6 @@ const db = require("./helper/db.js");
       socket.emit("message", "Auth failure, restarting...");
     });
   });
-
-  // send message
-  app.post(
-    "/send-message",
-    [
-      check("number")
-        .isLength({
-          min: 5,
-        })
-        .withMessage("must be at least 5 chars long")
-        .matches(/^[0-9]+$/)
-        .withMessage("number only"),
-      check("message").notEmpty().withMessage("message cannot be empty"),
-    ],
-    (req, res) => {
-      const errors = validationResult(req).formatWith(({ msg }) => {
-        return msg;
-      });
-      if (!errors.isEmpty()) {
-        return res.status(422).json({
-          status: false,
-          message: errors.mapped(),
-        });
-      }
-      const number = phoneNumberFormatter(req.body.number);
-      const message = req.body.message;
-      client
-        .sendMessage(number, message)
-        .then((response) => {
-          res.status(200).json({
-            status: true,
-            response: response,
-          });
-        })
-        .catch((err) => {
-          res.status(500).json({
-            status: false,
-            response: err,
-          });
-        });
-    }
-  );
 
   server.listen(port, () => {
     console.log("app running at:" + port);
