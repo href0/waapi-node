@@ -121,6 +121,10 @@ const db = require("./helper/db.js");
       console.log("ready");
       socket.emit("message", "Whatsapp Ready");
       socket.emit("ready", "Whatsapp Ready");
+      if (session) {
+        socket.emit("ready", "Whatsapp Ready");
+      }
+
       // if (fs.existsSync(SESSION_FILE_PATH)) {
       //     io.emit('ready', 'Whatsapp Ready')
       //     io.emit('authenticated', 'Whatsapp authenticated')
