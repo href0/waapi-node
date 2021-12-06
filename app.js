@@ -121,7 +121,7 @@ const db = require("./helper/db.js");
       console.log("ready");
       socket.emit("message", "Whatsapp Ready");
       socket.emit("ready", "Whatsapp Ready");
-      if (session) {
+      if (savedSession) {
         socket.emit("ready", "Whatsapp Ready");
       }
 
