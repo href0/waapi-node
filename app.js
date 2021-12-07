@@ -34,6 +34,7 @@ const db = require("./helper/db.js");
 
   //socket io
   io.on("connection", (socket) => {
+    console.log("save:" + savedSession);
     const client = new Client({
       restartOnAuthFail: true,
       puppeteer: {
@@ -51,6 +52,7 @@ const db = require("./helper/db.js");
       },
       session: savedSession,
     });
+    client.initialize();
     client.on("message", (msg) => {
       if (msg.body == "p" || msg.body == "P") {
         msg.reply("papope");
@@ -98,16 +100,14 @@ const db = require("./helper/db.js");
           });
       }
     );
-    client.initialize();
 
-    client.on("disconnected", (reason) => {
-      console.log("Whatsapp disconnected");
-      db.removeSession();
-      client.destroy();
-      client.initialize();
-    });
     socket.emit("message", "Connecting... please wait");
 
+    client.on("ready", () => {
+      console.log("ready");
+      socket.emit("message", "Whatsapp Ready");
+      socket.emit("ready", "Whatsapp Ready");
+    });
     client.on("qr", (qr) => {
       // Generate and scan this code with your phone
       console.log("QR RECEIVED", qr);
@@ -117,19 +117,7 @@ const db = require("./helper/db.js");
         socket.emit("scan", "QR Code received, please scan");
       });
     });
-    client.on("ready", () => {
-      console.log("ready");
-      socket.emit("message", "Whatsapp Ready");
-      socket.emit("ready", "Whatsapp Ready");
-      if (savedSession) {
-        socket.emit("ready", "Whatsapp Ready");
-      }
 
-      // if (fs.existsSync(SESSION_FILE_PATH)) {
-      //     io.emit('ready', 'Whatsapp Ready')
-      //     io.emit('authenticated', 'Whatsapp authenticated')
-      // }
-    });
     client.on("authenticated", (session) => {
       console.log("AUTHENTICATED", session);
       socket.emit("authenticated", "Whatsapp authenticated");
@@ -138,6 +126,13 @@ const db = require("./helper/db.js");
     });
     client.on("auth_failure", function (session) {
       socket.emit("message", "Auth failure, restarting...");
+    });
+
+    client.on("disconnected", (reason) => {
+      console.log("Whatsapp disconnected");
+      db.removeSession();
+      client.destroy();
+      client.initialize();
     });
   });
 

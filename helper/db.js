@@ -1,8 +1,8 @@
 const { Client } = require("pg");
 
-// const url =
-//   "postgres://xemomvtgpexztz:71ad1d6161097988964ea001daa146384e8d7181d72bbf173c8139f3fbfc0ed1@ec2-44-193-111-218.compute-1.amazonaws.com:5432/d4541ko6l6l8ub";
-const url = process.env.DATABASE_URL;
+const url =
+  "postgres://bmwthjakkbagzx:6e6867a4d7d07e432027aa5c1a7fb9832e96b234586546858791f28caf13a9fc@ec2-3-230-219-251.compute-1.amazonaws.com:5432/d1njov88lhu1i7";
+// const url = process.env.DATABASE_URL;
 const client = new Client({
   connectionString: url,
   ssl: {
