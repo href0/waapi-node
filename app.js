@@ -86,12 +86,12 @@ const db = require("./helper/db.js");
       socket.emit("message", "Auth failure, restarting...");
     });
 
-    client.on("disconnected", (reason) => {
-      console.log("Whatsapp disconnected");
-      db.removeSession();
-      client.destroy();
-      client.initialize();
-    });
+    // client.on("disconnected", (reason) => {
+    //   console.log("Whatsapp disconnected");
+    //   db.removeSession();
+    //   client.destroy();
+    //   client.initialize();
+    // });
 
     // send message
     app.post(
