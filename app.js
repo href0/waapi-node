@@ -59,6 +59,40 @@ const db = require("./helper/db.js");
       }
     });
 
+    socket.emit("message", "Connecting... please wait");
+
+    client.on("ready", () => {
+      console.log("ready");
+      socket.emit("message", "Whatsapp Ready");
+      socket.emit("ready", "Whatsapp Ready");
+    });
+    client.on("qr", (qr) => {
+      // Generate and scan this code with your phone
+      console.log("QR RECEIVED", qr);
+      qrcode.toDataURL(qr, (errm, url) => {
+        socket.emit("qr", url);
+        socket.emit("message", "QR Code received, please scan");
+        socket.emit("scan", "QR Code received, please scan");
+      });
+    });
+
+    client.on("authenticated", (session) => {
+      console.log("AUTHENTICATED", session);
+      socket.emit("authenticated", "Whatsapp authenticated");
+      socket.emit("message", "Whatsapp authenticated");
+      db.saveSession(session);
+    });
+    client.on("auth_failure", function (session) {
+      socket.emit("message", "Auth failure, restarting...");
+    });
+
+    client.on("disconnected", (reason) => {
+      console.log("Whatsapp disconnected");
+      db.removeSession();
+      client.destroy();
+      client.initialize();
+    });
+
     // send message
     app.post(
       "/send-message",
@@ -95,45 +129,11 @@ const db = require("./helper/db.js");
           .catch((err) => {
             res.status(500).json({
               status: false,
-              response: err,
+              response: number + message,
             });
           });
       }
     );
-
-    socket.emit("message", "Connecting... please wait");
-
-    client.on("ready", () => {
-      console.log("ready");
-      socket.emit("message", "Whatsapp Ready");
-      socket.emit("ready", "Whatsapp Ready");
-    });
-    client.on("qr", (qr) => {
-      // Generate and scan this code with your phone
-      console.log("QR RECEIVED", qr);
-      qrcode.toDataURL(qr, (errm, url) => {
-        socket.emit("qr", url);
-        socket.emit("message", "QR Code received, please scan");
-        socket.emit("scan", "QR Code received, please scan");
-      });
-    });
-
-    client.on("authenticated", (session) => {
-      console.log("AUTHENTICATED", session);
-      socket.emit("authenticated", "Whatsapp authenticated");
-      socket.emit("message", "Whatsapp authenticated");
-      db.saveSession(session);
-    });
-    client.on("auth_failure", function (session) {
-      socket.emit("message", "Auth failure, restarting...");
-    });
-
-    client.on("disconnected", (reason) => {
-      console.log("Whatsapp disconnected");
-      db.removeSession();
-      client.destroy();
-      client.initialize();
-    });
   });
 
   server.listen(port, () => {
